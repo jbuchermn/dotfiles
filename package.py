@@ -322,58 +322,78 @@ class Layer:
 
 
 if __name__ == '__main__':
+    excludes = ['.git']
+
+    """
+    Load data
+    """
     files = Files()
     layers = []
 
     for f in next(os.walk(files.configuration_root))[1]:
-        layers += [Layer(os.path.join(files.configuration_root, f), files)]
+        if f not in excludes:
+            layers += [Layer(os.path.join(files.configuration_root, f), files)]
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('command')
-    parser.add_argument('layer', default=None)
-    args = parser.parse_args()
-
-    if args.command == 'status':
+    def handle_status(args):
         for l in layers:
             l.print_detailed()
 
-    elif args.command == 'doctor':
+    def handle_doctor(args):
         for l in layers:
             if l.get_status() == 'C':
                 l.convert_to_symlink()
 
-    elif args.command == 'merge':
-        if args.layer is None:
-            print("Missing layer")
+    def handle_merge(args):
+        layer = None
+        for l in layers:
+            if l.name == args.layer:
+                layer = l
+                break
+
+        if layer is None:
+            print("Layer not found: %s" % args.layer)
         else:
-            layer = None
-            for l in layers:
-                if l.name == args.layer:
-                    layer = l
-                    break
+            layer.merge()
 
-            if layer is None:
-                print("Layer not found: %s" % args.layer)
-            else:
-                layer.merge()
+    def handle_unmerge(args):
+        layer = None
+        for l in layers:
+            if l.name == args.layer:
+                layer = l
+                break
 
-    elif args.command == 'unmerge':
-        if args.layer is None:
-            print("Missing layer")
+        if layer is None:
+            print("Layer not found: %s" % args.layer)
         else:
-            layer = None
-            for l in layers:
-                if l.name == args.layer:
-                    layer = l
-                    break
+            layer.unmerge()
 
-            if layer is None:
-                print("Layer not found: %s" % args.layer)
-            else:
-                layer.unmerge()
+    """
+    Parse command line
+    """
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
 
-    else:
-        print("Unrecognized command '%s'" % args.command)
+    status_parser = subparsers.add_parser('status')
+    doctor_parser = subparsers.add_parser('doctor')
+    merge_parser = subparsers.add_parser('merge')
+    unmerge_parser = subparsers.add_parser('unmerge')
+
+    status_parser.set_defaults(func=handle_status)
+    doctor_parser.set_defaults(func=handle_doctor)
+    merge_parser.set_defaults(func=handle_merge)
+    unmerge_parser.set_defaults(func=handle_unmerge)
+
+    merge_parser.add_argument('layer')
+    unmerge_parser.add_argument('layer')
+
+    """
+    Main
+    """
+    args = parser.parse_args()
+    try:
+        args.func(args)
+    except Exception:
+        parser.print_help()
 
 
 
