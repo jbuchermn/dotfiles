@@ -32,6 +32,12 @@ def git_diff(file1, file2):
         return False
 
 
+def confirm(text):
+    answer = input('%s [Y/n]' % text)
+    return (answer != 'n' and answer != 'N'
+            and answer != 'No' and answer != 'no')
+
+
 """
 Classes
 """
@@ -75,6 +81,31 @@ class Files:
         f = File(rel_path, os.path.join(self.root, rel_path))
         self.files += [f]
         return f
+
+    def detect_broken_symlinks(self):
+        def test_dir(directory):
+            find = subprocess.Popen(['find', directory, '-type', 'l',
+                                     '-exec', 'test', '!', '-e', '{}', ';',
+                                     '-print'],
+                                    stdout=subprocess.PIPE)
+            try:
+                result = find.communicate()[0].decode('UTF-8')
+                return result.split()
+            except Exception:
+                print("WARNING! Could not call find")
+                return []
+
+        directories = {os.path.dirname(f.path) for f in self.files}
+
+        """
+        Exclude $HOME
+        """
+        if self.root in directories:
+            directories.remove(self.root)
+
+        for d in directories:
+            for f in test_dir(d):
+                yield f
 
 
 class Node:
@@ -187,9 +218,7 @@ class Node:
             raise Exception("Not supported")
 
         print('Warning! Overwriting changes in %s' % self.file.path)
-        confirm = input('Proceed? [Y/n]')
-        if confirm != 'n' and confirm != 'N' \
-                and confirm != 'No' and confirm != 'no':
+        if(confirm('Proceed?')):
             os.remove(self.file.path)
             self.merge()
 
@@ -203,9 +232,7 @@ class Node:
             raise Exception("Not supported")
 
         print('Warning! Overwriting changes in %s' % self.path)
-        confirm = input('Proceed? [Y/n]')
-        if confirm != 'n' and confirm != 'N' \
-                and confirm != 'No' and confirm != 'no':
+        if(confirm('Proceed?')):
             symlink = None
             try:
                 symlink = os.path.readlink(self.file.path)
@@ -343,6 +370,20 @@ if __name__ == '__main__':
             if l.get_status() == 'C':
                 l.convert_to_symlink()
 
+        broken_symlinks = list(files.detect_broken_symlinks())
+        if len(broken_symlinks) > 0:
+            print("Found %d broken symlinks:" % len(broken_symlinks))
+
+            for f in broken_symlinks:
+                print("\t%s" % f)
+
+            if confirm('Delete?'):
+                for f in broken_symlinks:
+                    os.remove(f)
+
+
+
+
     def handle_merge(args):
         layer = None
         for l in layers:
@@ -390,10 +431,10 @@ if __name__ == '__main__':
     Main
     """
     args = parser.parse_args()
-    try:
-        args.func(args)
-    except Exception:
-        parser.print_help()
+    # try:
+    args.func(args)
+    # except Exception:
+    #     parser.print_help()
 
 
 

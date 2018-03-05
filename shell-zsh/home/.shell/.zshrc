@@ -1,4 +1,4 @@
-source $SHELL_DIR/base.sh
+source $HOME/.shell/base.sh
 
 # Plugins
 plugins=(
@@ -12,7 +12,7 @@ bindkey "^?" backward-delete-char
 
 
 # zsh-autosuggestions
-source $SHELL_DIR/zsh-autosuggestions/zsh-autosuggestions.zsh
+source $HOME/.shell/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 
 # tab-completion
@@ -30,6 +30,6 @@ setopt correctall
 CASE_SENSITIVE="true"
 
 # oh-my-zsh
-export ZSH=$SHELL_DIR/oh-my-zsh
+export ZSH=$HOME/.shell/oh-my-zsh
 ZSH_THEME="spaceship"
 source $ZSH/oh-my-zsh.sh

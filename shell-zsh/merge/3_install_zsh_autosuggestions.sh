@@ -1,6 +1,6 @@
 #!/bin/sh
 
-if [-d "$HOME/.shell/zsh-autosuggestions" ]; then
+if [ -d "$HOME/.shell/zsh-autosuggestions" ]; then
     echo "Found zsh-autosuggestions. Skipping."
     exit 0
 fi
