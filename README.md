@@ -1,18 +1,8 @@
-# Powerline fonts (used by nvim-dark and shell-zsh)
+# Note: Powerline fonts (used by nvim-dark and shell-zsh)
 
 [Powerline](https://github.com/powerline/fonts)
 
-# Enable shell configuration
-
-Zsh configuration enabled by default (.zshrc included). Configuration for
-Bash must be added to .bash_profile (on macOS) or .bashrc (on Linux):
-
-```bash
-export SHELL_DIR=~/.shell
-source $SHELL_DIR/bash.sh
-```
-
-# True color support in Emacs
+# Note: True color support in Emacs
 
 Version should be something like 26, 27, ... (25.3 did NOT work), start emacs with TERM=xterm-24bit emacs -nw
 
