@@ -4,5 +4,5 @@ if [ -d "$HOME/.dein" ]; then
     exit 0
 fi
 
-curl https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh > /tmp/installer.sh
-sh /tmp/installer.sh "$HOME/.dein"
+echo "Installing dein.vim..."
+curl -s "https://raw.githubusercontent.com/Shougo/dein.vim/master/bin/installer.sh" | sh /dev/stdin "$HOME/.dein"
