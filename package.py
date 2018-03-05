@@ -11,7 +11,7 @@ Static helpers
 
 def get_all_files(directory):
     for path, subdirs, files in os.walk(directory):
-        for name in files:
+        for name in sorted(files):
             rel_directory = os.path.relpath(path, directory)
             yield os.path.join(rel_directory, name)
 
