@@ -3,39 +3,58 @@ import os
 import shutil
 import subprocess
 import argparse
+import filecmp
+from enum import Enum
 
 """
 Static helpers
 """
 
 
-def get_all_files(directory):
+def get_all_files(directory, rel=True):
     for path, subdirs, files in os.walk(directory):
         for name in sorted(files):
-            rel_directory = os.path.relpath(path, directory)
-            yield os.path.join(rel_directory, name)
+            if rel:
+                rel_directory = os.path.relpath(path, directory)
+                yield os.path.join(rel_directory, name)
+            else:
+                yield os.path.join(path, name)
 
 
-def git_diff(file1, file2):
-    """
-    Returns True if the files are identical
-    """
-
-    diff = subprocess.Popen(['git', 'diff', '--no-index', file1, file2],
-                            stdout=subprocess.PIPE)
-
-    try:
-        result = diff.communicate()[0].decode('UTF-8')
-        return result.strip() == ""
-    except Exception:
-        print("WARNING! Could not call git diff")
-        return False
+def collect_files(fs):
+    for f in fs:
+        if os.path.isfile(f):
+            yield f
+        else:
+            yield from get_all_files(f, rel=False)
 
 
 def confirm(text):
-    answer = input('%s [Y/n]' % text)
+    answer = input('%s [Y/n] ' % text)
     return (answer != 'n' and answer != 'N'
             and answer != 'No' and answer != 'no')
+
+
+def find_broken_symlinks(file_or_directory):
+    find = subprocess.Popen(['find', file_or_directory, '-type', 'l',
+                             '-exec', 'test', '!', '-e', '{}', ';',
+                             '-print'],
+                            stdout=subprocess.PIPE)
+    try:
+        result = find.communicate()[0].decode('UTF-8')
+        return result.split()
+    except Exception:
+        print("WARNING! Could not call find")
+        return []
+
+
+def split_path(path):
+    head, tail = os.path.split(path)
+    components = []
+    while len(tail) > 0:
+        components.insert(0, tail)
+        head, tail = os.path.split(head)
+    return components
 
 
 """
@@ -45,8 +64,8 @@ Classes
 
 class File:
     """
-    Represents one file of the active configuration, e. g. ~/.vimrc.
-    This may be associated to many different nodes (i. e. alternatives)
+    Represents a configuration file living in $HOME.
+    This is the active configuration.
     """
     def __init__(self, rel_path, path):
         self.rel_path = rel_path
@@ -61,6 +80,18 @@ class File:
         p = Node(self, layer)
         self.nodes += [p]
         return p
+
+    def is_invalid(self):
+        for n in self.nodes:
+            if n.state() == NodeState.INVALID:
+                return True
+
+        return False
+
+    def get_hardlinks(self):
+        for n in self.nodes:
+            if n.state() == NodeState.HARDLINKED:
+                yield n
 
 
 class Files:
@@ -82,52 +113,87 @@ class Files:
         self.files += [f]
         return f
 
-    def detect_broken_symlinks(self):
-        def test_dir(directory):
-            find = subprocess.Popen(['find', directory, '-type', 'l',
-                                     '-exec', 'test', '!', '-e', '{}', ';',
-                                     '-print'],
-                                    stdout=subprocess.PIPE)
+    def get_abs(self, abs_path):
+        abs_path = os.path.normpath(abs_path)
+        if abs_path.startswith(self.configuration_root):
+            abs_path = os.path.relpath(abs_path, self.configuration_root)
+
+            """
+            Remove first two components, i. e. layername/home
+            from path to get a relative path
+            """
             try:
-                result = find.communicate()[0].decode('UTF-8')
-                return result.split()
+                rel_path = os.path.join(split_path(abs_path)[2:])
             except Exception:
-                print("WARNING! Could not call find")
-                return []
+                return None
+            return self.get(rel_path)
 
-        directories = {os.path.dirname(f.path) for f in self.files}
+        elif abs_path.startswith(self.root):
+            rel_path = os.path.relpath(abs_path, self.root)
+            return self.get(rel_path)
 
-        """
-        Exclude $HOME
-        """
-        if self.root in directories:
-            directories.remove(self.root)
+        else:
+            return None
 
-        for d in directories:
-            for f in test_dir(d):
-                yield f
+
+class NodeState(Enum):
+    """
+    This file is only present in the configuration layer, not
+    in the actual file system
+    """
+    UNMERGED = 'U'
+
+    """
+    This file is only present in the actual configuration,
+    not in the layer. Intermediate state during ingest and release.
+    """
+    INGESTING = 'I'
+
+    """
+    The file is symlinked to this node
+    """
+    SYMLINKED = 'M'
+
+    """
+    The file is identical with this node
+    """
+    HARDLINKED = 'H'
+
+    """
+    The file is owned by another node (either SYMLINKED or HARDLINKED)
+    """
+    BLOCKED = 'x'
+
+    """
+    The file is owned by a layer on top
+    """
+    SHADOWED = '-'
+
+    """
+    Present, but not identical and not owned by another node.
+    Implies all nodes associated to this file are INVALID
+
+    Blocks all layer operations.
+    """
+    INVALID = '!'
 
 
 class Node:
     """
-    The association between a File and a Layer
-
-    Status:
-        N => Target file is not present
-        O => Target file is owned by another layer
-        S => Correctly symlinked
-        C => Present and identical
-        ! => Present and differs (can only happen for all Nodes
-                linked to one File)
+    Represents one option for a configuration file.
+    Implements the association between File and Layer.
+    If file is given by ~/path/to/.conf, the node resides
+    in dotfiles/layer/home/path/to/.conf
 
     Commands:
-        merge:      SCN -> S
-        unmerge:    SCN -> N
-        force_out:  !   -> S        overwriting changes in target
-        force_in:   !   -> S        overwriting changes in node
-
-    Notice that the state 'O' needs to be resolved in the owning layer.
-    All methods will raise an Exception when called on 'O'
+        unmerge:    UNMERGED, SYMLINKED             -> UNMERGED
+        merge:      UNMERGED, SYMLINKED, HARDLINKED -> SYMLINKED
+        ingest:     INGESTING                       -> SYMLINKED
+        release:    SYMLINKED                       -> INGESTING
+        force_out:  INVALID                         -> SYMLINKED
+            overwriting changes in file
+        force_out:  INVALID                         -> SYMLINKED
+            overwriting changes in node
     """
 
     def __init__(self, file_, layer):
@@ -136,15 +202,35 @@ class Node:
         self.rel_path = file_.rel_path
         self.path = os.path.join(layer.node_root, file_.rel_path)
 
-    def get_status(self):
+    def find_top(self):
+        for layer in self.layer.top:
+            for node in layer.nodes:
+                if node.file == self.file:
+                    yield node
+
+    def find_bottom(self):
+        if self.layer.bottom is not None:
+            for node in self.layer.bottom.nodes:
+                if node.file == self.file:
+                    return node
+
+        return None
+
+    def print_detailed(self):
+        print("\t[%s] %s" % (self.state().value, self.rel_path))
+
+    def state(self):
         """
-        First case: File does not exist
+        Either file does not exist
         """
         if not os.path.isfile(self.file.path):
-            return 'N'
+            return NodeState.UNMERGED
+
+        if not os.path.isfile(self.path):
+            return NodeState.INGESTING
 
         """
-        Second case: We are symlinked
+        We are symlinked
         """
         symlink = None
         try:
@@ -155,67 +241,111 @@ class Node:
         if (symlink is not None and
                 os.path.normpath(symlink) ==
                 os.path.normpath(self.path)):
-            return 'S'
+            return NodeState.SYMLINKED
 
         """
-        Third case: File is identical => Claim ownership
+        Layer on top claims ownership
         """
-        if git_diff(self.path, self.file.path):
-            return 'C'
+        for n in self.find_top():
+            if n.state() in [NodeState.SHADOWED,
+                             NodeState.SYMLINKED,
+                             NodeState.HARDLINKED]:
+                return NodeState.SHADOWED
 
         """
-        Fourth case: File present and differs. If another node
-        claims ownership, we acknowledge (O), else move to !
+        File is identical => Claim ownership
+        """
+        if filecmp.cmp(self.path, self.file.path):
+            return NodeState.HARDLINKED
+
+        """
+        File present and differs. If another node
+        claims ownership, we acknowledge (BLOCKED),
+        else move to INVALID
         """
         for n in self.file.nodes:
-            if n != self and n.get_status() in ['C', 'S']:
-                return 'O'
+            if n != self and n.state() in [NodeState.SYMLINKED,
+                                           NodeState.HARDLINKED]:
+                return NodeState.BLOCKED
 
-        return '!'
+        return NodeState.INVALID
 
     def unmerge(self):
-        status = self.get_status()
+        state = self.state()
 
         """
         Safety checks
         """
-        if status not in ['C', 'S', 'N']:
-            raise Exception("Not supported")
+        if state not in [NodeState.UNMERGED, NodeState.SYMLINKED]:
+            raise Exception("Not allowed")
 
-        if status == 'N':
+        if state == NodeState.UNMERGED:
             return
 
         print('Removing %s' % self.file.path)
         os.remove(self.file.path)
 
     def merge(self):
-        status = self.get_status()
+        state = self.state()
 
         """
         Safety checks
         """
-        if status not in ['C', 'S', 'N']:
-            raise Exception("Not supported")
+        if state not in [NodeState.UNMERGED, NodeState.SYMLINKED,
+                         NodeState.HARDLINKED]:
+            raise Exception("Not allowed")
 
-        if status == 'S':
+        if state == NodeState.SYMLINKED:
             return
 
-        self.unmerge()
-
-        if status == 'N':
+        if state == NodeState.UNMERGED:
             os.makedirs(os.path.dirname(self.file.path), exist_ok=True)
+        else:
+            print('Removing %s' % self.file.path)
+            os.remove(self.file.path)
 
         print('Symlinking %s -> %s' % (self.file.path, self.path))
         os.symlink(self.path, self.file.path)
 
-    def force_out(self):
-        status = self.get_status()
-
+    def ingest(self):
         """
         Safety checks
         """
-        if status != '!':
-            raise Exception("Not supported")
+        if self.state() != NodeState.INGESTING:
+            raise Exception("Not allowed")
+
+        os.makedirs(os.path.dirname(self.path), exist_ok=True)
+        shutil.copyfile(self.file.path, self.path)
+
+        if self.state() != NodeState.HARDLINKED:
+            raise Exception("Ingestion went wrong")
+
+        self.merge()
+
+    def release(self):
+        """
+        Safety checks
+        """
+        if self.state() != NodeState.SYMLINKED:
+            raise Exception("Not allowed")
+
+        os.remove(self.file.path)
+        shutil.copyfile(self.path, self.file.path)
+
+        if self.state() != NodeState.HARDLINKED:
+            raise Exception("Release went wrong")
+
+        os.remove(self.path)
+
+        if self.state() != NodeState.INGESTING:
+            raise Exception("Release went wrong")
+
+    def force_out(self):
+        """
+        Safety checks
+        """
+        if self.state() != NodeState.INVALID:
+            raise Exception("Not allowed")
 
         print('Warning! Overwriting changes in %s' % self.file.path)
         if(confirm('Proceed?')):
@@ -223,13 +353,11 @@ class Node:
             self.merge()
 
     def force_in(self):
-        status = self.get_status()
-
         """
         Safety checks
         """
-        if status != '!':
-            raise Exception("Not supported")
+        if self.state() != NodeState.INVALID:
+            raise Exception("Not allowed")
 
         print('Warning! Overwriting changes in %s' % self.path)
         if(confirm('Proceed?')):
@@ -239,31 +367,45 @@ class Node:
             except Exception:
                 pass
 
-            os.remove(self.package)
+            os.remove(self.path)
             if symlink is not None:
                 shutil.copyfile(symlink, self.path)
             else:
                 shutil.copyfile(self.file.path, self.path)
 
-    def print_detailed(self):
-        print("\t[%s] %s" % (self.get_status(), self.rel_path))
+
+class LayerState(Enum):
+    """
+    All files are UNMERGED
+    """
+    UNMERGED = 'U'
+
+    """
+    All files are SYMLINKED
+    """
+    MERGED = 'M'
+
+    """
+    All files are either SYMLINKED or SHADOWED
+    """
+    SHADOWED = '-'
+
+    """
+    All other cases
+    """
+    INVALID = '!'
 
 
 class Layer:
     """
-    Configuration Unit: A bunch of files grouped together
-
-    Status:
-        N => Not merged, maybe same files but different content.
-        O => Contains files owned by other layers. Can't be merged.
-        C => Merged, but not all files are symlinked.
-        S => Merged, all files are symlinked.
+    Represents a choice for a given subset of configuration files.
+    Layers can be stacked on top of each other (i. e. nvim-dark is
+    on top of nvim), meaning that nvim-dark requires nvim,
+    but is allowed override parts of it.
 
     Commands:
-        merge:      SCN -> S
-        unmerge:    SCN -> N
-
-    O needs to be resolved in the conflicting layer
+        merge:  UNMERGED    -> MERGED
+        unmerge: MERGED     -> UNMERGED
     """
     def __init__(self, path, files):
         self.path = path
@@ -279,43 +421,60 @@ class Layer:
         self.unmerge_hooks = [os.path.join(self.path, 'unmerge', f) for f in
                               get_all_files(
                                   os.path.join(self.path, 'unmerge'))]
+        self.top = []
+        self.bottom = None
 
-    def get_status(self):
-        status = 'S'
+    def add_file(self, file_):
+        self.nodes += [file_.create_node(self)]
+
+    def link(self, all_layers):
+        if self.bottom is not None:
+            return
+
+        self.top = []
+        for layer in all_layers:
+            if layer == self:
+                continue
+
+            if (layer.name.startswith(self.name)
+                    and layer.name[len(self.name)] == '-'
+                    and '-' not in layer.name[len(self.name) + 1:]):
+                self.top += [layer]
+                layer.bottom = self
+
+    def print_detailed(self):
+        print("---------------------")
+        print("[%s] %s" % (self.state().value, self.name))
+        if self.bottom is not None:
+            print("    -> %s" % self.bottom.name)
         for f in self.nodes:
-            s = f.get_status()
-            if s == 'N':
-                return 'N'
+            f.print_detailed()
 
-            elif s == '!':
-                return 'N'
+    def state(self):
+        states = {f.state() for f in self.nodes}
 
-            elif s == 'O':
-                return 'O'
+        if states == {NodeState.UNMERGED}:
+            return LayerState.UNMERGED
+        elif states == {NodeState.SYMLINKED}:
+            return LayerState.MERGED
+        elif states == {NodeState.SYMLINKED, NodeState.SHADOWED}:
+            return LayerState.SHADOWED
 
-            elif s == 'S':
-                continue
-
-            elif s == 'C':
-                status = 'C'
-                continue
-
-            else:
-                raise Exception("Unexpected status")
-
-        return status
+        return LayerState.INVALID
 
     def merge(self):
-        status = self.get_status()
-
+        state = self.state()
         """
         Safety checks
         """
-        if status not in ['C', 'S', 'N']:
-            raise Exception("Not supported")
+        if state not in [LayerState.UNMERGED, LayerState.MERGED]:
+            raise Exception("Not allowed")
 
-        if status == 'S':
+        if state == LayerState.MERGED:
             return
+
+        if self.bottom is not None:
+            self.bottom.merge()
 
         print("Merging %s..." % self.name)
         for f in self.nodes:
@@ -326,34 +485,32 @@ class Layer:
             subprocess.call(f)
 
     def unmerge(self):
-        status = self.get_status()
+        state = self.state()
 
         """
         Safety checks
         """
-        if status not in ['C', 'S', 'N']:
-            raise Exception("Not supported")
+        if state not in [LayerState.UNMERGED, LayerState.MERGED]:
+            raise Exception("Not allowed")
 
-        if status == 'N':
+        if state == LayerState.UNMERGED:
             return
+
+        for layer in self.top:
+            if layer.state() == LayerState.MERGED:
+                layer.unmerge()
 
         print("Unmerging %s..." % self.name)
         for f in self.nodes:
             f.unmerge()
 
-    def print_detailed(self):
-        print("---------------------")
-        print("[%s] %s" % (self.get_status(), self.name))
-        for f in self.nodes:
-            f.print_detailed()
+
+"""
+Functions
+"""
 
 
-if __name__ == '__main__':
-    excludes = ['.git']
-
-    """
-    Load data
-    """
+def setup(excludes):
     files = Files()
     layers = []
 
@@ -361,29 +518,130 @@ if __name__ == '__main__':
         if f not in excludes:
             layers += [Layer(os.path.join(files.configuration_root, f), files)]
 
+    for layer in layers:
+        layer.link(layers)
+
+    return files, layers
+
+
+def doctor_broken_symlinks(files_or_directories):
+    broken_symlinks = []
+    for f in files_or_directories:
+        broken_symlinks += find_broken_symlinks(f)
+
+    if len(broken_symlinks) > 0:
+        print("Found %d broken symlinks:" % len(broken_symlinks))
+
+        for f in broken_symlinks:
+            print("\t%s" % f)
+
+        if confirm('Delete?'):
+            for f in broken_symlinks:
+                os.remove(f)
+
+
+def doctor(files, layers):
+    """
+    Detect broken symlinks and delete them.
+    We do not keep track of crated symlinks, so this will never work perfectly.
+    """
+    directories = {os.path.dirname(f.path) for f in files.files}
+    if files.root in directories:
+        directories.remove(files.root)
+
+    doctor_broken_symlinks(directories)
+
+    """
+    Helper
+    """
+    def choose_layer(layers):
+        for i, n in enumerate(layers):
+            print("---------- %d -----------" % i)
+            n.layer.print_detailed()
+        while True:
+            pick = input("Pick? ")
+            try:
+                idx = int(pick)
+            except Exception:
+                continue
+
+            if idx >= len(f.nodes):
+                continue
+
+            return idx
+
+    """
+    Fix HARDLINKED files
+    """
+    for f in files.files:
+        hardlinks = list(f.get_hardlinks())
+        if len(hardlinks) > 0:
+            print("Hardlinked file: %s" % f.rel_path)
+            if len(hardlinks) == 1:
+                hardlinks[0].merge()
+            else:
+                idx = choose_layer([n.layer for n in hardlinks])
+                hardlinks[idx].merge()
+
+    """
+    Fix invalid files
+    """
+    for f in files.files:
+        if f.is_invalid():
+            print("Invalid file: %s" % f.rel_path)
+            node = None
+            if len(f.nodes) == 1:
+                node = f.nodes[0]
+            else:
+                idx = choose_layer([n.layer for n in f.nodes])
+                node = f.nodes[idx]
+
+            print("")
+            node.layer.print_detailed()
+
+            force_in = None
+            while True:
+                force_in = input("[I]ngest or [R]elease? ")
+                print("'%s'" % force_in)
+                if force_in not in 'IiRr':
+                    continue
+                force_in = force_in in ['I', 'i']
+                break
+
+            if force_in:
+                node.force_in()
+            else:
+                node.force_out()
+
+
+if __name__ == '__main__':
+    excludes = ['.git']
+
+    """
+    Load data and ensure it is in a useful state
+    """
+    files, layers = setup(excludes)
+    doctor(files, layers)
+
+    """
+    Setup parser
+    """
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers()
+
+    """
+    Print summary of installed and available layers
+    """
     def handle_status(args):
         for l in layers:
             l.print_detailed()
 
-    def handle_doctor(args):
-        for l in layers:
-            if l.get_status() == 'C':
-                l.convert_to_symlink()
+    status_parser = subparsers.add_parser('status')
+    status_parser.set_defaults(func=handle_status)
 
-        broken_symlinks = list(files.detect_broken_symlinks())
-        if len(broken_symlinks) > 0:
-            print("Found %d broken symlinks:" % len(broken_symlinks))
-
-            for f in broken_symlinks:
-                print("\t%s" % f)
-
-            if confirm('Delete?'):
-                for f in broken_symlinks:
-                    os.remove(f)
-
-
-
-
+    """
+    Merge layer into actual configuration
+    """
     def handle_merge(args):
         layer = None
         for l in layers:
@@ -393,9 +651,35 @@ if __name__ == '__main__':
 
         if layer is None:
             print("Layer not found: %s" % args.layer)
-        else:
-            layer.merge()
+            return
 
+        additional_merges = []
+        tmp = layer.bottom
+        while tmp is not None:
+            if tmp.state() != LayerState.MERGED:
+                additional_merges += [tmp]
+
+            tmp = tmp.bottom
+
+        if len(additional_merges) > 0:
+            print("This step requires merging of")
+            for i, l in enumerate(additional_merges):
+                for j in range(2 * i):
+                    print(" ", end='')
+                print("-> %s" % l.name)
+
+            if not confirm("Confirm?"):
+                return
+
+        layer.merge()
+
+    merge_parser = subparsers.add_parser('merge')
+    merge_parser.set_defaults(func=handle_merge)
+    merge_parser.add_argument('layer')
+
+    """
+    Remove layer from actual configuration
+    """
     def handle_unmerge(args):
         layer = None
         for l in layers:
@@ -405,36 +689,145 @@ if __name__ == '__main__':
 
         if layer is None:
             print("Layer not found: %s" % args.layer)
-        else:
-            layer.unmerge()
+            return
 
-    """
-    Parse command line
-    """
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers()
+        def collect(layer, additional_unmerges):
+            for l in layer.top:
+                if l.state() == LayerState.MERGED:
+                    additional_unmerges += [l]
+                    collect(l, additional_unmerges)
+        additional_unmerges = []
+        collect(layer, additional_unmerges)
 
-    status_parser = subparsers.add_parser('status')
-    doctor_parser = subparsers.add_parser('doctor')
-    merge_parser = subparsers.add_parser('merge')
+        if len(additional_unmerges) > 0:
+            print("This step requires unmerging of")
+            for i, l in enumerate(additional_unmerges):
+                for j in range(2 * i):
+                    print(" ", end='')
+                print("<- %s" % l.name)
+
+            if not confirm("Confirm?"):
+                return
+
+        layer.unmerge()
+
     unmerge_parser = subparsers.add_parser('unmerge')
-
-    status_parser.set_defaults(func=handle_status)
-    doctor_parser.set_defaults(func=handle_doctor)
-    merge_parser.set_defaults(func=handle_merge)
     unmerge_parser.set_defaults(func=handle_unmerge)
-
-    merge_parser.add_argument('layer')
     unmerge_parser.add_argument('layer')
+
+    """
+    Check for broken symlinks in specific files/folders
+    """
+    def handle_doctor(args):
+        doctor_broken_symlinks(args.files)
+
+    doctor_parser = subparsers.add_parser('doctor')
+    doctor_parser.set_defaults(func=handle_doctor)
+    doctor_parser.add_argument('files', nargs='+')
+
+    """
+    Move actual configuration into existing/new layer
+    """
+    def handle_ingest(args):
+        layer = None
+        for l in layers:
+            if l.name == args.layer:
+                layer = l
+                break
+
+        new_layer = False
+        if layer is None:
+            layer = Layer(os.path.join(
+                files.configuration_root, args.layer), [])
+            new_layer = True
+
+        new_nodes = []
+        for f in collect_files(args.files):
+            f = files.get_abs(f)
+            if f is None:
+                continue
+            if len(f.nodes) > 0:
+                continue
+
+            layer.add_file(f)
+            new_nodes += [layer.nodes[-1]]
+
+        if len(new_nodes) == 0:
+            print("Could not find any matching files.")
+            return
+
+        print("Ingesting...")
+        for n in new_nodes:
+            print("\t%s" % n.rel_path)
+        print("...%d files into %slayer %s" %
+              (len(new_nodes), "new " if new_layer else "", layer.name))
+
+        if confirm("Confirm?"):
+            for n in new_nodes:
+                if n.state() != NodeState.INGESTING:
+                    print("WARNING! Could not ingest %s" % n.rel_path)
+                else:
+                    n.ingest()
+
+    ingest_parser = subparsers.add_parser('ingest')
+    ingest_parser.set_defaults(func=handle_ingest)
+    ingest_parser.add_argument('layer')
+    ingest_parser.add_argument('files', nargs='+')
+
+    """
+    Move configuration form layer to outside no longer handling it
+    """
+    def handle_release(args):
+        layer = None
+        for l in layers:
+            if l.name == args.layer:
+                layer = l
+                break
+
+        if layer is None:
+            print("Layer not found: %s" % args.layer)
+            return
+
+        nodes = []
+        for f in collect_files(args.files):
+            f = files.get_abs(f)
+            if f is None:
+                continue
+
+            for n in f.nodes:
+                if n.layer == layer:
+                    nodes += [n]
+                    break
+
+        if len(nodes) == 0:
+            print("Could not find any matching files.")
+            return
+
+        print("Releasing...")
+        for n in nodes:
+            print("\t%s" % n.rel_path)
+        print("...%d files from layer %s" % (len(nodes), layer.name))
+
+        if confirm("Confirm?"):
+            for n in nodes:
+                if n.state() != NodeState.SYMLINKED:
+                    print("WARNING! Could not ingest %s" % n.rel_path)
+                else:
+                    n.release()
+
+    release_parser = subparsers.add_parser('release')
+    release_parser.set_defaults(func=handle_release)
+    release_parser.add_argument('layer')
+    release_parser.add_argument('files', nargs='+')
 
     """
     Main
     """
     args = parser.parse_args()
-    # try:
-    args.func(args)
-    # except Exception:
-    #     parser.print_help()
+    if 'func' in args:
+        args.func(args)
+    else:
+        parser.print_help()
 
 
 
