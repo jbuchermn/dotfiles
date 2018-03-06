@@ -1,5 +1,5 @@
 # Configurations
-source $SHELL_DIR/z/z.sh
-source $SHELL_DIR/env.sh
-source $SHELL_DIR/convenience.sh
+source $HOME/.shell/z/z.sh
+source $HOME/.shell/env.sh
+source $HOME/.shell/convenience.sh
 

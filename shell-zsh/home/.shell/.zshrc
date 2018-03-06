@@ -1,4 +1,4 @@
-source $HOME/.shell/base.sh
+source $HOME/.shell/.bashrc
 
 # Plugins
 plugins=(
