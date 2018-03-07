@@ -25,7 +25,7 @@ if dein#load_state('~/.dein')
     call dein#add('zchee/deoplete-jedi')
 
     " Symbols
-    " call dein#add('~/Daten/nvim/nvimbols')
+    call dein#add('jbuchermn/nvimbols')
 
     " Navigation
     call dein#add('tpope/vim-eunuch')
@@ -49,7 +49,7 @@ if dein#load_state('~/.dein')
     call dein#add('bling/vim-airline') 
 
     " CPP
-    " call dein#add('~/Daten/nvim/rtags-nvim')
+    call dein#add('jbuchermn/rtags-nvim')
 
     " Python
     call dein#add('Vimjas/vim-python-pep8-indent')
