@@ -12,7 +12,7 @@ awk -v term_cols="${width:-$(tput cols || echo 80)}" 'BEGIN{
     }
 }'
 
-source oceanic_next.sh
+source ./oceanic_next.sh
 
 function hex_to_escape (){
     local hex=$1
