@@ -57,6 +57,41 @@ def split_path(path):
     return components
 
 
+def find_bottom(layer, all_layers):
+    """
+    Pick all candidates, s.t. layer starts with <candidate>-
+    """
+    candidates = [l for l in all_layers if layer.startswith(l + '-')]
+
+    """
+    Find the one highest up in the hierarchy
+    """
+    while True:
+        next_candidates = []
+        for c in candidates:
+            if find_bottom(c, candidates) is not None:
+                next_candidates += [c]
+
+        if len(next_candidates) == 0:
+            if len(candidates) > 1:
+                raise Exception("Something went wrong")
+            return candidates[0] if len(candidates) > 0 else None
+
+        candidates = next_candidates
+
+
+def find_top(layer, all_layers):
+    """
+    Pick all that start with <layer>-
+    """
+    candidates = [l for l in all_layers if l.startswith(layer + '-')]
+
+    """
+    Exclude the ones that have a bottom within candidates
+    """
+    return [l for l in candidates if find_bottom(l, candidates) is None]
+
+
 """
 Classes
 """
@@ -431,16 +466,12 @@ class Layer:
         if self.bottom is not None:
             return
 
-        self.top = []
-        for layer in all_layers:
-            if layer == self:
-                continue
+        top = find_top(self.name, [l.name for l in all_layers])
+        self.top = [l for l in all_layers if l.name in top]
 
-            if (layer.name.startswith(self.name)
-                    and layer.name[len(self.name)] == '-'
-                    and '-' not in layer.name[len(self.name) + 1:]):
-                self.top += [layer]
-                layer.bottom = self
+        bottom = find_bottom(self.name, [l.name for l in all_layers])
+        self.bottom = [l for l in all_layers if l.name == bottom][0] \
+            if bottom is not None else None
 
     def print_detailed(self):
         print("---------------------")
