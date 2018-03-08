@@ -13,5 +13,6 @@ export TMPDIR=/tmp
 # Default compilers to use
 export CXX=mpicxx
 export CC=mpicc
-export OMPI_CXX=g++-7
+# TODO: Only Mac
+# export OMPI_CXX=g++-7
 
