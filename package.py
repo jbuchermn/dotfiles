@@ -646,7 +646,7 @@ def doctor(files, layers):
 
 
 if __name__ == '__main__':
-    excludes = ['.git']
+    excludes = ['.git',  'ignore']
 
     """
     Load data and ensure it is in a useful state

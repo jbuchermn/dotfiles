@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+name="RTags Daemon"
+
+start(){
+	ebegin "Starting rdm"
+	start-stop-daemon --background --start --make-pidfile --pidfile /var/run/user/1000/rdm.pid --user jonas \
+		/usr/bin/rdm -- --socket-file /var/run/user/1000/rdm.socket
+	eend $?
+}
+
+stop(){
+	ebegin "Stopping rdm"
+	start-stop-daemon --stop --pidfile /var/run/user/1000/rdm.pid --user jonas \
+		/usr/bin/rdm
+	eend $?
+}
