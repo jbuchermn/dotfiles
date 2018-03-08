@@ -33,3 +33,6 @@ CASE_SENSITIVE="true"
 export ZSH=$HOME/.shell/oh-my-zsh
 ZSH_THEME="spaceship"
 source $ZSH/oh-my-zsh.sh
+
+# Do not share history
+unsetopt share_history

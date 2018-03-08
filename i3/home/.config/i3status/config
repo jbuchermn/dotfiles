@@ -1,0 +1,48 @@
+general {
+        colors = true
+        interval = 5
+        color_good = "#00ff00"
+        color_bad = "#ff0000"
+}
+
+order += "disk /"
+disk "/" {
+        format = "%free/%total"
+}
+
+order += "wireless wlp3s0"
+wireless wlp3s0 {
+        # quality fixed to width 3, leave no space 
+        format_up = "W:%quality %essid %bitrate %ip"
+        format_down = "W: down"
+}
+
+order += "ethernet enp0s31f16"
+ethernet enp0s31f16 {
+        format_up = "E: %speed %ip"
+        format_down = "E: down"
+}
+
+order += "battery 0"
+battery 0 {
+        format = "%status %percentage %remaining %emptytime"
+        format_down = "No battery"
+        status_chr = "CHR"
+        status_bat = "BAT"
+        status_unk = "UNK"
+        status_full = "FULL"
+        path = "/sys/class/power_supply/BAT%d/uevent"
+        threshold_type = "percentage"
+        low_threshold = 10
+}
+
+order += "tztime local"
+tztime local {
+        format = "%Y-%m-%d %H:%M:%S"
+}
+
+order += "load"
+load {
+        format = "%5min"
+}
+
