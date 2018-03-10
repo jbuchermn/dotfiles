@@ -30,6 +30,26 @@ font pango:monospace 8
 # clear in small sizes. However, its unicode glyph coverage is limited, the old
 # X core fonts rendering does not support right-to-left and this being a bitmap
 # font, it doesn’t scale on retina/hidpi displays.
+#
+
+# Define colors
+set $transparent #00000000
+set $color_01    #1b2b34
+set $color_02    #343d46
+set $color_03    #4f5b66
+set $color_04    #65737e
+set $color_05    #a7adba
+set $color_06    #c0c5ce
+set $color_07    #cdd3de
+set $color_08    #d8dee9
+set $color_09    #ec5f67
+set $color_0A    #f99157
+set $color_0B    #fac863
+set $color_0C    #99c794
+set $color_0D    #62b3b2
+set $color_0E    #6699cc
+set $color_0F    #c594c5
+set $color_10    #ffffff
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -159,13 +179,41 @@ bindsym $mod+r mode "resize"
 # gaps outer 5
 
 # Colors
-client.focused              #6699cc #6699cc #ffffff #ffffff #6699cc
-client.focused_inactive     #343d46 #343d46 #4f5b66 #4f5b66 #343d46
-client.unfocused            #343d46 #343d46 #4f5b66 #4f5b66 #343d46
+client.focused              $transparent $transparent $color_10 $color_10 $transparent
+#client.focused              $color_0E $color_0E $color_10 $color_10 $color_0E
+client.focused_inactive     $color_02 $color_02 $color_03 $color_03 $color_02
+client.unfocused            $color_02 $color_02 $color_03 $color_03 $color_02
+
+# Pulse Audio controls
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5% #increase sound volume
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5% #decrease sound volume
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
+
+# Sreen brightness controls
+bindsym XF86MonBrightnessUp exec xbacklight -inc 20 # increase screen brightness
+bindsym XF86MonBrightnessDown exec xbacklight -dec 20 # decrease screen brightness
 
 # Start i3bar to display a workspace bar (plus the system information i3status
 # finds out, if available)
 bar {
-        # position top
-        status_command i3status
+# position top
+    status_command i3status
+
+    colors {
+        statusline         $color_10
+        background         $transparent
+        separator          $transparent
+
+        inactive_workspace $transparent $transparent $color_0E
+        focused_workspace  $transparent $transparent $color_10
+        active_workspace   $transparent $transparent $color_10
+        urgent_workspace   $color_09    $color_09    $transparent
+        binding_mode       $color_09    $color_09    $transparent
+    }
+
 }
+
+
+exec_always --no-startup-id feh --bg-fill $HOME/Pictures/wallpaper.jpg
+exec --no-startup-id compton -b
+
