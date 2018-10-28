@@ -162,7 +162,7 @@ vmap <Left> <gv
 vmap <Right> >gv
 
 " Toggle comments
-let g:tcommentMaps = 0
+let g:tcomment_maps = 0
 nnoremap <silent> <leader>cc :TComment<CR>
 vnoremap <silent> <leader>cc :TComment<CR>
 vnoremap <silent> <leader>ci :TCommentInline<CR>
