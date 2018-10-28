@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check if battery level can be read
 if [[ -z "$(command -v pmset)" ]] && [[ -z "$(command -v upower)" ]]; then

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Check if backlight can be changed
 if [[ -z "$(command -v xbacklight)" ]]; then
