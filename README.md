@@ -8,18 +8,38 @@ Version should be something like 26, 27, ... (25.3 did NOT work), start emacs wi
 
 File install_terminfo_iterm2.sh
 
-    #!/bin/bash
-    tic -x -o ~/.terminfo install_terminfo_iterm2.src
+```bash
+#!/bin/bash
+tic -x -o ~/.terminfo install_terminfo_iterm2.src
+```
 
 File install_terminfo_iterm2.src
 
-    # Use colon separators.
-    xterm-24bit|xterm with 24-bit direct color mode,
-       use=xterm-256color,
-       setb24=\E[48:2:%p1%{65536}%/%d:%p1%{256}%/%{255}%&%d:%p1%{255}%&%dm,
-       setf24=\E[38:2:%p1%{65536}%/%d:%p1%{256}%/%{255}%&%d:%p1%{255}%&%dm,
-    # Use semicolon separators.
-    xterm-24bits|xterm with 24-bit direct color mode,
-       use=xterm-256color,
-       setb24=\E[48;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
-       setf24=\E[38;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+```bash
+# Use colon separators.
+xterm-24bit|xterm with 24-bit direct color mode,
+   use=xterm-256color,
+   setb24=\E[48:2:%p1%{65536}%/%d:%p1%{256}%/%{255}%&%d:%p1%{255}%&%dm,
+   setf24=\E[38:2:%p1%{65536}%/%d:%p1%{256}%/%{255}%&%d:%p1%{255}%&%dm,
+# Use semicolon separators.
+xterm-24bits|xterm with 24-bit direct color mode,
+   use=xterm-256color,
+   setb24=\E[48;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+   setf24=\E[38;2;%p1%{65536}%/%d;%p1%{256}%/%{255}%&%d;%p1%{255}%&%dm,
+```
+
+# Note: VBox Guest
+
+Don't use guest iso provided by VirtualBox, follow instructions on Arch Wiki. For modesetting in X.Org:
+
+```bash
+xrandr --newmode "2560x1440x60.0"  348.50  2560 2752 3032 3504  1440 1441 1444 1500 -hsync +vsync
+xrandr --addmode Virtual-1 "2560x1440x60.0"
+xrandr --output Virtual-1 --mode "2560x1440x60.0"
+```
+
+where the first line can be found using 
+
+```bash
+cat /var/log/Xorg.0.log | grep modesetting
+```
