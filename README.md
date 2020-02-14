@@ -2,6 +2,10 @@
 
 [Powerline](https://github.com/powerline/fonts)
 
+# Note: Oceanic-Next theme for iTerm2
+
+[OceanicNext](https://github.com/mhartington/oceanic-next-iterm)
+
 # Note: True color support in Emacs
 
 Version should be something like 26, 27, ... (25.3 did NOT work), start emacs with TERM=xterm-24bit emacs -nw
