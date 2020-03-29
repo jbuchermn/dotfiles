@@ -3,72 +3,75 @@
 if &compatible
     set nocompatible
 endif
-set runtimepath+=~/.dein/repos/github.com/Shougo/dein.vim
+set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
 
-if dein#load_state('~/.dein')
-    call dein#begin('~/.dein')
 
-    call dein#add('Shougo/dein.vim')
+if dein#load_state('~/.cache/dein')
+    call dein#begin('~/.cache/dein')
+
+    call dein#add('~/.cache/dein/repos/github.com/Shougo/dein.vim')
 
     " Denite
     call dein#add('Shougo/denite.nvim')
-
+    
     " TODO Does not work
-    call dein#add('mhartington/denite-neomake')
-
+    " call dein#add('mhartington/denite-neomake')
+    
     " Neomake
     call dein#add('neomake/neomake')
-
+    
     " Deoplete
     call dein#add('Shougo/deoplete.nvim')
     call dein#add('carlitux/deoplete-ternjs')
     call dein#add('zchee/deoplete-jedi')
-
+    
     " Symbols
     call dein#add('jbuchermn/nvimbols')
-
+    
     " Navigation
     call dein#add('tpope/vim-eunuch')
     call dein#add('tpope/vim-projectionist')
     call dein#add('scrooloose/nerdtree') 
     call dein#add('lambdalisue/lista.nvim')
     call dein#add('cloudhead/neovim-fuzzy')
-
+    
     " Util
     call dein#add('tomtom/tcomment_vim')
     call dein#add('jiangmiao/auto-pairs')
-
+    
     " Git
     call dein#add('tpope/vim-fugitive')
     call dein#add('airblade/vim-gitgutter')
     call dein#add('Xuyuanp/nerdtree-git-plugin')
     call dein#add('gregsexton/gitv')
-
+    
     " Styling
     call dein#add('mhartington/oceanic-next')
     call dein#add('bling/vim-airline') 
-
+    
     " CPP
     call dein#add('jbuchermn/rtags-nvim')
-
+    
     " Python
     call dein#add('Vimjas/vim-python-pep8-indent')
-
+    
     " JavaScript
     call dein#add('pangloss/vim-javascript')
     call dein#add('moll/vim-node')
     call dein#add('mxw/vim-jsx')
-
+    
     " CSV
     call dein#add('chrisbra/csv.vim')
 
-    if dein#check_install()
-        call dein#install()
-    endif
+    " Flutter
+    call dein#add('dart-lang/dart-vim-plugin')
+    call dein#add('thosakwe/vim-flutter')
+    call dein#add('tiagofumo/dart-vim-flutter-layout')
 
     call dein#end()
     call dein#save_state()
 endif
+
 " }}}
 
 " Global {{{
@@ -92,7 +95,7 @@ set foldlevelstart=20
 " Indentation
 set autoindent
 set smartindent
-set cinoptions+=:0 " Indentation of switch-case
+" set cinoptions+=:0 " Indentation of switch-case
 
 filetype plugin indent on
 
@@ -227,6 +230,10 @@ augroup end
 
 " JavaScript {{{
 let g:jsx_ext_required = 0
+" }}}
+
+" Dart {{{
+let g:dart_style_guide = 1
 " }}}
 
 " NVimbols {{{
