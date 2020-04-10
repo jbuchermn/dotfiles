@@ -13,12 +13,8 @@ if dein#load_state('~/.cache/dein')
 
     " Denite
     call dein#add('Shougo/denite.nvim')
-    
-    " Neomake
-    " call dein#add('neomake/neomake')
-    " call dein#add('mhartington/denite-neomake')
 
-    " Coc
+    " CoC
     call dein#add('neoclide/coc.nvim', {'merged':0, 'rev': 'release'})
 
     " Navigation
@@ -30,7 +26,6 @@ if dein#load_state('~/.cache/dein')
     
     " Util
     call dein#add('tomtom/tcomment_vim')
-    call dein#add('jiangmiao/auto-pairs')
     
     " Git
     call dein#add('tpope/vim-fugitive')
@@ -41,9 +36,6 @@ if dein#load_state('~/.cache/dein')
     " Styling
     call dein#add('mhartington/oceanic-next')
     call dein#add('bling/vim-airline') 
-    
-    " CPP
-    call dein#add('jbuchermn/rtags-nvim')
     
     " Python
     call dein#add('Vimjas/vim-python-pep8-indent')
@@ -75,6 +67,7 @@ set exrc " Use local .vimrc
 set so=999 " Keep cursor centered vertically
 syntax enable
 set number
+set hidden
 
 set path=$PWD/**
 
@@ -88,7 +81,7 @@ set foldlevelstart=20
 " Indentation
 set autoindent
 set smartindent
-" set cinoptions+=:0 " Indentation of switch-case
+set cinoptions+=:0 " Indentation of switch-case
 
 filetype plugin indent on
 
@@ -128,7 +121,7 @@ set undofile
 
 " }}}
 
-" Key Mappings - Needs to be cleaned up{{{
+" Key Mappings {{{
 
 " Easier to reach
 nmap ö :
@@ -168,9 +161,7 @@ noremap  <silent> <leader>ph :A<CR>
 noremap  <silent> <leader>pv :AV<CR>
 noremap  <silent> <leader>ps :AS<CR>
 
-" Neomake/Location list
-noremap <leader>mm :Neomake<CR>
-noremap <leader>md :Denite neomake<CR>
+" Location list
 noremap <leader>mo :lopen<CR>
 noremap <leader>mc :lclose<CR>
 
@@ -186,6 +177,7 @@ let g:lista#custom_mappings = [
 " Denite
 map <silent> <leader>gi :Denite -post-action=open -start-filter grep:::!<CR>
 map <silent> <leader>gg :Denite -post-action=open grep<CR>
+
 
 " Fuzzy Finder
 nnoremap <silent> <leader>e :FuzzyOpen<CR>
@@ -226,31 +218,13 @@ let g:jsx_ext_required = 0
 let g:dart_style_guide = 1
 " }}}
 
-" Neomake {{{
-" let g:neomake_cpp_enabled_makers = ['rtags']
-" let g:neomake_c_enabled_makers =  ['rtags']
-" let g:neomake_javascript_enabled_makers = ['eslint']
-" let g:neomake_python_enabled_makers = ['flake8']
-"
-" function! ConfigureNeomake()
-"     if(&filetype == 'cpp' || &filetype == 'c')
-"         call neomake#configure#automake('r', 750)
-"     else
-"         call neomake#configure#automake('rnw', 750)
-"     endif
-" endfunction
-"
-" augroup Neomake_Filetype
-"     autocmd!
-"     autocmd Filetype * :call ConfigureNeomake()
-" augroup end
-" }}}
 
 " CoC {{{
 let g:coc_global_extensions = [
         \'coc-python',
         \'coc-json',
-        \'coc-flutter'
+        \'coc-flutter',
+        \'coc-pairs',
         \]
 
 " }}}
@@ -307,12 +281,6 @@ let g:airline_section_b = ''
 
 let g:airline#extensions#neomake#error_symbol='✖ '
 let g:airline#extensions#neomake#warning_symbol='⚠️  '
-
-" guibg matches OceanicNext
-hi NeomakeErrorMsg guifg=#ff0000 guibg=#343d46
-hi NeomakeWarningMsg guifg=#ffff00 guibg=#343d46
-let g:neomake_error_sign = {'text': '•', 'texthl': 'NeomakeErrorMsg'}
-let g:neomake_warning_sign = {'text': '•', 'texthl': 'NeomakeWarningMsg'}
 
 hi CursorLineNR guifg=#ffffff
 
