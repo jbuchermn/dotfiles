@@ -15,8 +15,8 @@ if dein#load_state('~/.cache/dein')
     call dein#add('Shougo/denite.nvim')
     
     " Neomake
-    call dein#add('neomake/neomake')
-    call dein#add('mhartington/denite-neomake')
+    " call dein#add('neomake/neomake')
+    " call dein#add('mhartington/denite-neomake')
 
     " Coc
     call dein#add('neoclide/coc.nvim', {'merged':0, 'rev': 'release'})
@@ -227,25 +227,24 @@ let g:dart_style_guide = 1
 " }}}
 
 " Neomake {{{
-let g:neomake_cpp_enabled_makers = ['rtags']
-let g:neomake_c_enabled_makers =  ['rtags']
-let g:neomake_javascript_enabled_makers = ['eslint']
-let g:neomake_python_enabled_makers = ['flake8']
-
-function! ConfigureNeomake()
-    if(&filetype == 'cpp' || &filetype == 'c')
-        call neomake#configure#automake('r', 750)
-    else
-        call neomake#configure#automake('rnw', 750)
-    endif
-endfunction
-
-augroup Neomake_Filetype
-    autocmd!
-    autocmd Filetype * :call ConfigureNeomake()
-augroup end
+" let g:neomake_cpp_enabled_makers = ['rtags']
+" let g:neomake_c_enabled_makers =  ['rtags']
+" let g:neomake_javascript_enabled_makers = ['eslint']
+" let g:neomake_python_enabled_makers = ['flake8']
+"
+" function! ConfigureNeomake()
+"     if(&filetype == 'cpp' || &filetype == 'c')
+"         call neomake#configure#automake('r', 750)
+"     else
+"         call neomake#configure#automake('rnw', 750)
+"     endif
+" endfunction
+"
+" augroup Neomake_Filetype
+"     autocmd!
+"     autocmd Filetype * :call ConfigureNeomake()
+" augroup end
 " }}}
-
 
 " CoC {{{
 let g:coc_global_extensions = [
