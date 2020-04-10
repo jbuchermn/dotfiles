@@ -177,7 +177,7 @@ noremap  <silent> <leader>ps :AS<CR>
 
 " Neomake/Location list
 noremap <leader>mm :Neomake<CR>
-noremap <leader>md :Denite -no-quit neomake<CR>
+noremap <leader>md :Denite neomake<CR>
 noremap <leader>mo :lopen<CR>
 noremap <leader>mc :lclose<CR>
 
@@ -191,8 +191,8 @@ let g:lista#custom_mappings = [
             \ ]
 
 " Denite
-map <silent> <leader>gi :Denite -no-quit grep:::!<CR>
-map <silent> <leader>gg :Denite -no-quit grep<CR>
+map <silent> <leader>gi :Denite grep:::!<CR>
+map <silent> <leader>gg :Denite grep<CR>
 
 " Fuzzy Finder
 nnoremap <silent> <leader>e :FuzzyOpen<CR>
@@ -313,6 +313,7 @@ endif
 colorscheme OceanicNext
 let g:airline_theme='oceanicnext'
 let g:airline_powerline_fonts = 1
+let g:airline_section_b = ''
 
 let g:airline#extensions#neomake#error_symbol='✖ '
 let g:airline#extensions#neomake#warning_symbol='⚠️  '
