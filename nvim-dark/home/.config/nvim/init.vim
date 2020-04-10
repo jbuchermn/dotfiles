@@ -18,6 +18,9 @@ if dein#load_state('~/.cache/dein')
     call dein#add('neomake/neomake')
     call dein#add('mhartington/denite-neomake')
 
+    " Coc
+    call dein#add('neoclide/coc.nvim', {'merged':0, 'rev': 'release'})
+
     " Navigation
     call dein#add('tpope/vim-eunuch')
     call dein#add('tpope/vim-projectionist')
@@ -241,6 +244,16 @@ augroup Neomake_Filetype
     autocmd!
     autocmd Filetype * :call ConfigureNeomake()
 augroup end
+" }}}
+
+
+" CoC {{{
+let g:coc_global_extensions = [
+        \'coc-python',
+        \'coc-json',
+        \'coc-flutter'
+        \]
+
 " }}}
 
 " Denite {{{
