@@ -14,19 +14,9 @@ if dein#load_state('~/.cache/dein')
     " Denite
     call dein#add('Shougo/denite.nvim')
     
-    " TODO Does not work
-    " call dein#add('mhartington/denite-neomake')
-    
     " Neomake
     call dein#add('neomake/neomake')
-    
-    " Deoplete
-    call dein#add('Shougo/deoplete.nvim')
-    call dein#add('carlitux/deoplete-ternjs')
-    call dein#add('zchee/deoplete-jedi')
-    
-    " Symbols
-    call dein#add('jbuchermn/nvimbols')
+    call dein#add('mhartington/denite-neomake')
     
     " Navigation
     call dein#add('tpope/vim-eunuch')
@@ -204,9 +194,6 @@ let NERDTreeShowHidden=1
 nnoremap - :NERDTreeToggle<CR>
 vnoremap - :NERDTreeToggle<CR>
 
-nnoremap _ :NVimbolsToggle<CR>
-vnoremap _ :NVimbolsToggle<CR>
-
 " Frequent Typos
 command! Q :q
 command! WQ :wq
@@ -234,24 +221,6 @@ let g:jsx_ext_required = 0
 
 " Dart {{{
 let g:dart_style_guide = 1
-" }}}
-
-" NVimbols {{{
-let g:nvimbols_enabled = 1
-" }}}
-
-" Deoplete {{{
-
-" General
-let g:deoplete#enable_at_startup = 1
-set completeopt-=preview
-
-" Display more than mere fractions
-let g:deoplete#max_abbr_width = 0
-let g:deoplete#max_menu_width = 0
-
-" Turn on TernJS
-let g:tern_request_timeout = 1
 " }}}
 
 " Neomake {{{
