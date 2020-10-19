@@ -32,6 +32,8 @@ font pango:monospace 8
 # font, it doesn’t scale on retina/hidpi displays.
 #
 
+# output "*" scale 1.
+
 # Define colors
 set $transparent #00000000
 set $color_01    #1b2b34
