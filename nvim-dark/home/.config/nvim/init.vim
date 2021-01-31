@@ -60,7 +60,7 @@ endif
 " }}}
 
 " Global {{{
-language en_GB.UTF-8 " Language is ENGLISH!
+" language en_US.UTF-8 " Language is ENGLISH!
 set encoding=utf8
 set mouse=a " Mouse scrolling
 set exrc " Use local .vimrc
