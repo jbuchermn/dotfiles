@@ -8,7 +8,7 @@ echo "To automatically start the VM add"
 echo ""
 echo "  source \$HOME/.shell/start_pywm.sh"
 echo ""
-echo "to either.
+echo "to either."
 echo ""
 echo "######################################################"
 echo "######################################################"
