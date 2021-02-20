@@ -47,3 +47,7 @@ where the first line can be found using
 ```bash
 cat /var/log/Xorg.0.log | grep modesetting
 ```
+
+# Note: zsh remnant characters on tabcomplete
+
+Make sure locale is set (`locale-gen`)
