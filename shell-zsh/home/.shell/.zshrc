@@ -33,6 +33,9 @@ compdef _git gst=git-status
 alias gl='git pull'
 compdef _git gl=git-pull
 
+alias gd='git diff'
+compdef _git gd=git-diff
+
 alias gp='git push'
 compdef _git gp=git-push
 
