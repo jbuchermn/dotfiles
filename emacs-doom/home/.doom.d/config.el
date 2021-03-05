@@ -88,5 +88,3 @@
 (map! :leader
       :desc "Treemacs symbols"
       "c S" #'lsp-treemacs-symbols)
-
-
