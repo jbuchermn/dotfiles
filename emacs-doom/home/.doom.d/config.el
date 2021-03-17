@@ -61,7 +61,7 @@
 ;; Restore sensible word detection
 (defun my-restore-sensible-words ()
   (modify-syntax-entry ?_ "w"))
-(dolist (hook '(python-mode-hook c-mode-hook))
+(dolist (hook '(python-mode-hook c-mode-hook js-mode-hook))
   (add-hook hook 'my-restore-sensible-words))
 
 
@@ -88,3 +88,18 @@
 (map! :leader
       :desc "Treemacs symbols"
       "c S" #'lsp-treemacs-symbols)
+
+;; Comments on SPC c c
+(map! :leader
+      :desc "Comment"
+      "c c" #'comment-line)
+
+;; Indentation using arrow keys
+(evil-define-key 'normal 'global
+  (kbd "<left>") 'evil-shift-left-line)
+(evil-define-key 'normal 'global
+  (kbd "<right>") 'evil-shift-right-line)
+(evil-define-key 'visual 'global
+  (kbd "<left>") 'evil-shift-left)
+(evil-define-key 'visual 'global
+  (kbd "<right>") 'evil-shift-right)
