@@ -103,3 +103,12 @@
   (kbd "<left>") 'evil-shift-left)
 (evil-define-key 'visual 'global
   (kbd "<right>") 'evil-shift-right)
+
+;; Flycheck
+(setq flycheck-relevant-error-other-file-show nil)
+
+;; Select mypy checker for all python files as default
+(load! "lisp/flycheck-mypy")
+(defun my-py-flycheck-setup ()
+  (flycheck-select-checker 'python-mypy))
+(add-hook 'python-mode-local-vars-hook #'my-py-flycheck-setup)

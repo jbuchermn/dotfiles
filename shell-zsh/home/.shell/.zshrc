@@ -24,6 +24,8 @@ CASE_SENSITIVE="true"
 
 # Do not share history
 unsetopt share_history
+SAVEHIST=1000
+HISTFILE=~/.zsh_history
 
 
 # git

@@ -50,8 +50,5 @@
 ;(unpin! t)
 
 
-;; Keep cursor centered vertically
 (package! centered-cursor-mode)
-
-;; Integrate LSP and Treemacs
 (package! lsp-treemacs)
