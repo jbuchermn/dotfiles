@@ -49,14 +49,15 @@ if __name__ == '__main__':
     pt = Path(sys.argv[2]).absolute()
 
     if pf.is_file():
-        files = [str(pf)]
+        files = [str(pf.name)]
+        pf = pf.parents[0]
         pt = pt.parents[0]
     else:
-        files = [str(s) for s in sync_dir(pf, pt)]
+        files = [str(s.relative_to(pf)) for s in sync_dir(pf, pt)]
 
     files = "\n".join(files)
 
-    run(["rsync", "--progress", "--modify-window=2", "--update", "--times", "--files-from=-", "/", str(pt)],
+    run(["rsync", "--progress", "--modify-window=2", "--update", "--times", "--files-from=-", str(pf), str(pt)],
         input=files.encode("utf-8"))
 
 
