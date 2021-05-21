@@ -17,7 +17,7 @@ source $HOME/.shell/zsh-autosuggestions/zsh-autosuggestions.zsh
 
 # tab-completion
 autoload -U compinit
-compinit
+compinit -u
 
 zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
 zstyle ':completion:*:warniings' format'%BNo matches for: %d%b'
@@ -30,6 +30,7 @@ setopt correctall
 CASE_SENSITIVE="true"
 
 # oh-my-zsh
+ZSH_DISABLE_COMPFIX=true
 export ZSH=$HOME/.shell/oh-my-zsh
 ZSH_THEME="spaceship"
 source $ZSH/oh-my-zsh.sh
