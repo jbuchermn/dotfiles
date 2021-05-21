@@ -39,7 +39,8 @@ def find_broken_symlinks(file_or_directory):
     find = subprocess.Popen(['find', file_or_directory, '-type', 'l',
                              '-exec', 'test', '!', '-e', '{}', ';',
                              '-print'],
-                            stdout=subprocess.PIPE)
+                            stdout=subprocess.PIPE,
+                            stderr=open(os.devnull, 'w'))
     try:
         result = find.communicate()[0].decode('UTF-8')
         return result.split()
@@ -499,7 +500,11 @@ class Layer:
         Safety checks
         """
         if state not in [LayerState.UNMERGED, LayerState.MERGED]:
-            raise Exception("Not allowed")
+            """
+            Special case: Unmerged files result in LayerState.INVALID
+            """
+            if {f.state() for f in self.nodes} != {NodeState.UNMERGED, NodeState.SYMLINKED}:
+                raise Exception("Not allowed")
 
         if state == LayerState.MERGED:
             return
