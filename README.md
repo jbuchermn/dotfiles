@@ -47,3 +47,11 @@ where the first line can be found using
 ```bash
 cat /var/log/Xorg.0.log | grep modesetting
 ```
+
+# Note: zsh remnant characters on tabcomplete
+
+Make sure locale is set (`locale-gen`)
+
+# Note: MBP suspend on Arch
+
+https://wiki.archlinux.org/index.php/Power_management/Suspend_and_hibernate#Instantaneous_wakeups_from_suspend

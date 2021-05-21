@@ -3,7 +3,7 @@ if(!exists('g:WincentFocusBlacklist'))
 endif
 
 function! wincent#focus_enabled()
-    return index(g:WincentFocusBlacklist, &filetype) == -1
+    return 0 " index(g:WincentFocusBlacklist, &filetype) == -1
 endfunction
 
 function! wincent#blur_window() abort

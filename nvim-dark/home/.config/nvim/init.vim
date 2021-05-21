@@ -60,7 +60,7 @@ endif
 " }}}
 
 " Global {{{
-language en_GB.UTF-8 " Language is ENGLISH!
+" language en_US.UTF-8 " Language is ENGLISH!
 set encoding=utf8
 set mouse=a " Mouse scrolling
 set exrc " Use local .vimrc
@@ -218,7 +218,6 @@ let g:jsx_ext_required = 0
 let g:dart_style_guide = 1
 " }}}
 
-
 " CoC {{{
 let g:coc_global_extensions = [
         \'coc-python',
@@ -226,6 +225,93 @@ let g:coc_global_extensions = [
         \'coc-flutter',
         \'coc-pairs',
         \]
+
+" https://ianding.io/2019/07/29/configure-coc-nvim-for-c-c++-development/
+" if hidden is not set, TextEdit might fail.
+set hidden
+
+" Some servers have issues with backup files, see #649
+set nobackup
+set nowritebackup
+
+" Better display for messages
+set cmdheight=2
+
+" You will have bad experience for diagnostic messages when it's default 4000.
+set updatetime=300
+
+" don't give |ins-completion-menu| messages.
+set shortmess+=c
+
+" always show signcolumns
+set signcolumn=yes
+
+" Use tab for trigger completion with characters ahead and navigate.
+" Use command ':verbose imap <tab>' to make sure tab is not mapped by other plugin.
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? "\<C-n>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+" Use <c-space> to trigger completion.
+inoremap <silent><expr> <c-space> coc#refresh()
+
+" Use `[c` and `]c` to navigate diagnostics
+nmap <leader>ce <Plug>(coc-diagnostic-prev)
+nmap <leader>cE <Plug>(coc-diagnostic-next)
+
+" Remap keys for gotos
+nmap <leader>cd <Plug>(coc-definition)
+nmap <leader>cr <Plug>(coc-references)
+nmap <leader>cf :call CocAction('format')<CR>
+
+" Highlight symbol under cursor on CursorHold
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
+" Remap for rename current word
+nmap <leader>cF <Plug>(coc-rename)
+
+augroup mygroup
+  autocmd!
+  " Setup formatexpr specified filetype(s).
+  autocmd FileType typescript,json setl formatexpr=CocAction('formatSelected')
+  " Update signature help on jump placeholder
+  autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
+augroup end
+
+" Use `:Format` to format current buffer
+command! -nargs=0 Format :call CocAction('format')
+
+" Use `:Fold` to fold current buffer
+command! -nargs=? Fold :call     CocAction('fold', <f-args>)
+
+" use `:OR` for organize import of current buffer
+command! -nargs=0 OR   :call     CocAction('runCommand', 'editor.action.organizeImport')
+
+" Using CocList
+" Show all diagnostics
+nnoremap <silent> <space>xd  :<C-u>CocList diagnostics<cr>
+" Manage extensions
+nnoremap <silent> <space>xe  :<C-u>CocList extensions<cr>
+" Show commands
+nnoremap <silent> <space>xc  :<C-u>CocList commands<cr>
+" Find symbol of current document
+nnoremap <silent> <space>xo  :<C-u>CocList outline<cr>
+" Search workspace symbols
+nnoremap <silent> <space>xs  :<C-u>CocList -I symbols<cr>
+" Do default action for next item.
+nnoremap <silent> <space>xj  :<C-u>CocNext<CR>
+" Do default action for previous item.
+nnoremap <silent> <space>xk  :<C-u>CocPrev<CR>
+" Resume latest coc list
+nnoremap <silent> <space>xp  :<C-u>CocListResume<CR>
+
 
 " }}}
 
