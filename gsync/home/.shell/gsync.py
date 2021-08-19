@@ -45,6 +45,9 @@ def sync_dir(path_from, path_to):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print("Usage: gsync <source folder> <target folder>")
+        exit(2)
     pf = Path(sys.argv[1]).absolute()
     pt = Path(sys.argv[2]).absolute()
 
