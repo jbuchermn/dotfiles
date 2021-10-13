@@ -1,6 +1,7 @@
-# Note: Powerline fonts (used by nvim-dark and shell-zsh)
+# Note: Fonts (used by nvim-dark and shell-zsh)
 
 [Powerline](https://github.com/powerline/fonts)
+[Nerd Fonts](https://github.com/ryanoasis/nerd-fonts)
 
 # Note: Oceanic-Next theme for iTerm2
 
