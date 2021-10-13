@@ -1,3 +1,11 @@
+# Note: github SSH setup
+
+USe following remote format:
+
+```bash
+git remote set-url origin ssh://git@github.com:/jbuchermn/xxx.git
+```
+
 # Note: Fonts (used by nvim-dark and shell-zsh)
 
 [Powerline](https://github.com/powerline/fonts)
