@@ -116,7 +116,7 @@ bar = {
         "CPU: %d%%" % psutil.cpu_percent(interval=1),
         get_nw(),
         "RAM: %d%%" % psutil.virtual_memory().percent
-    ],
+    ]
 }
 
 gestures = {
@@ -130,18 +130,20 @@ swipe = {
 
 panels = {
     'lock': {
-        'cmd': 'alacritty -e newm-panel-basic lock',
-        'w': 0.7,
-        'h': 0.6,
-        'corner_radius': 50,
+        # 'cmd': 'alacritty -e newm-panel-basic lock',
+        # 'w': 0.7,
+        # 'h': 0.6,
+        # 'corner_radius': 50,
+        'cmd': 'npm run start -- lock',
+        'cwd': '/home/jonas/newm-panel-nwjs'
     },
     'launcher': {
-        'cmd': 'alacritty -e newm-panel-basic launcher',
-        'w': 0.7,
-        'h': 0.6,
-        'corner_radius': 50,
-        # 'cmd': 'npm run start -- launcher',
-        # 'cwd': '/home/jonas/newm-panel-nwjs'
+        # 'cmd': 'alacritty -e newm-panel-basic launcher',
+        # 'w': 0.7,
+        # 'h': 0.6,
+        # 'corner_radius': 50,
+        'cmd': 'npm run start -- launcher',
+        'cwd': '/home/jonas/newm-panel-nwjs'
     },
     'notifiers': {
         'cmd': 'npm run start -- notifiers',
