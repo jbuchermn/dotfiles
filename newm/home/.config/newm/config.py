@@ -153,4 +153,4 @@ grid = {
     'throw_ps': [2, 10]
 }
 
-power_times = [120, 300]
+power_times = [300, 600]
