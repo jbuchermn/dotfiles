@@ -16,7 +16,6 @@ from newm import (
 OUTPUT_MANAGER = True
 
 output_scale = 2.0
-round_scale = 2.0
 
 pywm = {
     'xkb_model': "macintosh",
@@ -29,6 +28,8 @@ pywm = {
     # See comments in view.py
     'enable_output_manager': OUTPUT_MANAGER,
     'enable_xwayland': True,
+
+    'round_scale': output_scale
 }
 
 view = {
@@ -130,20 +131,20 @@ swipe = {
 
 panels = {
     'lock': {
-        # 'cmd': 'alacritty -e newm-panel-basic lock',
-        # 'w': 0.7,
-        # 'h': 0.6,
-        # 'corner_radius': 50,
-        'cmd': 'npm run start -- lock',
-        'cwd': '/home/jonas/newm-panel-nwjs'
+        'cmd': 'alacritty -e newm-panel-basic lock',
+        'w': 0.7,
+        'h': 0.6,
+        'corner_radius': 50,
+        # 'cmd': 'npm run start -- lock',
+        # 'cwd': '/home/jonas/newm-panel-nwjs'
     },
     'launcher': {
-        # 'cmd': 'alacritty -e newm-panel-basic launcher',
-        # 'w': 0.7,
-        # 'h': 0.6,
-        # 'corner_radius': 50,
-        'cmd': 'npm run start -- launcher',
-        'cwd': '/home/jonas/newm-panel-nwjs'
+        'cmd': 'alacritty -e newm-panel-basic launcher',
+        'w': 0.7,
+        'h': 0.6,
+        'corner_radius': 50,
+        # 'cmd': 'npm run start -- launcher',
+        # 'cwd': '/home/jonas/newm-panel-nwjs'
     },
     'notifiers': {
         'cmd': 'npm run start -- notifiers',
