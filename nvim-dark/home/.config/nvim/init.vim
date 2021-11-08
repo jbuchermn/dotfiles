@@ -157,9 +157,9 @@ vnoremap <silent> <leader>cc :TComment<CR>
 vnoremap <silent> <leader>ci :TCommentInline<CR>
 
 " Vim-Projectionist
-noremap  <silent> <leader>ph :A<CR>
-noremap  <silent> <leader>pv :AV<CR>
-noremap  <silent> <leader>ps :AS<CR>
+" noremap  <silent> <leader>ph :A<CR>
+" noremap  <silent> <leader>pv :AV<CR>
+" noremap  <silent> <leader>ps :AS<CR>
 
 " Location list
 noremap <leader>mo :lopen<CR>
@@ -175,14 +175,14 @@ let g:lista#custom_mappings = [
             \ ]
 
 " Denite
-map <silent> <leader>gi :Denite -post-action=open -start-filter grep:::!<CR>
-map <silent> <leader>gg :Denite -post-action=open grep<CR>
+" map <silent> <leader>gi :Denite -post-action=open -start-filter grep:::!<CR>
+map <silent> <leader>/ :Denite -post-action=open grep<CR>
 
 
 " Fuzzy Finder
-nnoremap <silent> <leader>e :FuzzyOpen<CR>
-nnoremap <silent> <leader>v :vnew<CR>:FuzzyOpen<CR>
-nnoremap <silent> <leader>s :new<CR>:FuzzyOpen<CR>
+nnoremap <silent> <leader>pf :FuzzyOpen<CR>
+" nnoremap <silent> <leader>v :vnew<CR>:FuzzyOpen<CR>
+" nnoremap <silent> <leader>s :new<CR>:FuzzyOpen<CR>
 
 " NERDTree
 let NERDTreeShowHidden=1
