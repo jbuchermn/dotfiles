@@ -15,7 +15,18 @@ from newm import (
 
 OUTPUT_MANAGER = True
 
-output_scale = 2.0
+def on_startup():
+    os.system("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=wlroots")
+    os.system("catapult &")
+
+# v1
+# output_scale = 2.
+
+outputs = [
+    { 'name': 'eDP-1', 'pos_x': 0, 'pos_y': 0, 'scale': 2560/1500},
+    { 'name': 'virt-1', 'pos_x': 1500,'pos_y': 0,'width': 640, 'height': 480, 'mHz': 30000, 'scale': 1., 'anim': False},
+    { 'name': 'HDMI-A-2', 'width': 3840, 'height': 2160, 'mHz': 30000, 'scale': 2.}
+]
 
 pywm = {
     'xkb_model': "macintosh",
@@ -29,7 +40,8 @@ pywm = {
     'enable_output_manager': OUTPUT_MANAGER,
     'enable_xwayland': True,
 
-    'round_scale': output_scale
+    # v1
+    # 'round_scale': 2.
 }
 
 view = {
@@ -46,8 +58,9 @@ swipe_zoom = {
     'grid_ovr': 0.02,
 }
 
+
 mod = PYWM_MOD_LOGO
-wallpaper = '/home/jonas/wallpaper.jpg'
+wallpaper = '/home/jonas/wallpaper-4.jpg'
 
 anim_time = .25
 blend_time = .5
@@ -70,13 +83,16 @@ key_bindings = lambda layout: [
     ("M-C-l", lambda: layout.resize_focused_view(1, 0)),
 
     ("M-Return", lambda: os.system("alacritty &")),
-    ("M-c", lambda: os.system("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland &")),
+    ("M-e", lambda: os.system("emacsclient -c -a \"emacs\" &")),
+    # ("M-c", lambda: os.system("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland &")),
+    ("M-c", lambda: os.system("MOZ_ENABLE_WAYLAND=1 firefox &")),
     ("M-q", lambda: layout.close_view()),
 
     ("M-p", lambda: layout.ensure_locked(dim=True)),
     ("M-P", lambda: layout.terminate()),
     ("M-C", lambda: layout.update_config()),
 
+    ("M-r", lambda: os.system("catapult &")),
     ("M-a", lambda: layout.enter_launcher_overlay()),
     ("M-f", lambda: layout.toggle_fullscreen()),
 
