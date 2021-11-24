@@ -32,7 +32,7 @@ def on_startup():
 # output_scale = 2.
 
 outputs = [
-    { 'name': 'eDP-1', 'pos_x': 0, 'pos_y': 0, 'scale': 2560/1500},
+    { 'name': 'eDP-1', 'pos_x': 0, 'pos_y': 0, 'scale': 2.}, #2560/1500},
     { 'name': 'virt-1', 'pos_x': 1500,'pos_y': 0,'width': 1280, 'height': 720,
         'mHz': 30000, 'scale': 1., 'anim': False},
     { 'name': 'HDMI-A-2', 'width': 3840, 'height': 2160, 'mHz': 30000, 'scale': 2.}
