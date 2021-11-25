@@ -45,9 +45,6 @@ pywm = {
 
     'encourage_csd': False,
     'debug_f1': True,
-
-    # See comments in view.py
-    'enable_output_manager': OUTPUT_MANAGER,
     'enable_xwayland': True,
 
     # v1
@@ -66,9 +63,6 @@ def should_float(view):
     return None
 
 view = {
-    # See comments in view.py
-    'xwayland_handle_scale_clientside': not OUTPUT_MANAGER,
-
     'padding': 8,
     'fullscreen_padding': 0,
     'send_fullscreen': False,
