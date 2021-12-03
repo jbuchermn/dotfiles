@@ -21,21 +21,20 @@ from newm import (
     SysBackendEndpoint_sysfs
 )
 
-OUTPUT_MANAGER = True
-
 def on_startup():
     os.system("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=wlroots")
     os.system("catapult &")
-    # os.system("waybar &")
+    os.system("waybar &")
 
-# v1
+# v0.1
 # output_scale = 2.
 
 outputs = [
-    { 'name': 'eDP-1', 'pos_x': 0, 'pos_y': 0, 'scale': 2.}, #2560/1500},
-    { 'name': 'virt-1', 'pos_x': 1500,'pos_y': 0,'width': 1280, 'height': 720,
-        'mHz': 30000, 'scale': 1., 'anim': False},
-    { 'name': 'HDMI-A-2', 'width': 3840, 'height': 2160, 'mHz': 30000, 'scale': 2.}
+    { 'name': 'eDP-1', 'pos_x': 0, 'pos_y': 0, 'scale': 2. },
+    { 'name': 'virt-1', 'pos_x': 1280, 'pos_y': 0, 'width': 1280, 'height': 720, 'scale': 1., 
+        'mHz': 30000, 'anim': False},
+    { 'name': 'HDMI-A-2', 'pos_x': 2560, 'width': 3840, 'height': 2160, 'scale': 2.,
+        'mHz': 30000}
 ]
 
 pywm = {
@@ -44,10 +43,11 @@ pywm = {
     'xkb_options': "caps:escape",
 
     'encourage_csd': False,
-    'debug_f1': True,
     'enable_xwayland': True,
 
-    # v1
+    'natural_scroll': True,
+
+    # v0.1
     # 'round_scale': 2.
 }
 
@@ -70,7 +70,7 @@ view = {
     'should_float': should_float,
     'floating_min_size': True,
 
-    # 'debug_scaling': True
+    'debug_scaling': True,
     'border_ws_switch': 100
 }
 
@@ -84,6 +84,7 @@ mod = PYWM_MOD_LOGO
 background = {
     'path': '/home/jonas/wallpaper-3.jpg',
     'time_scale': 0.125,
+    'anim': True,
 }
 
 anim_time = .25
@@ -108,6 +109,7 @@ key_bindings = lambda layout: [
 
     ("M-v", lambda: layout.toggle_focused_view_floating()),
     ("M-w", lambda: layout.change_focused_view_workspace()),
+    ("M-W", lambda: layout.move_workspace()),
     ("M-S", lambda: os.system("grim -g \"$(slurp)\" &")),
 
     ("M-Return", lambda: os.system("alacritty &")),
@@ -120,11 +122,11 @@ key_bindings = lambda layout: [
     ("M-P", lambda: layout.terminate()),
     ("M-C", lambda: layout.update_config()),
 
-    ("M-r", lambda: os.system("catapult &")),
-    ("M-a", lambda: os.system("rofi -show run &")),
+    # ("M-r", lambda: os.system("catapult &")),
+    ("M-r", lambda: os.system("rofi -show run &")),
     ("M-f", lambda: layout.toggle_fullscreen()),
 
-    ("ModPress", lambda: layout.toggle_overview(only_active_workspace=True)),
+    ("ModPress", lambda: layout.toggle_overview(only_active_workspace=False)),
 ]
 
 sys_backend_endpoints = [
@@ -151,6 +153,7 @@ def get_nw():
     return "%s: %s" % (ifdevice, ip)
 
 bar = {
+    'enabled': False,
     'top_texts': lambda: [
         pwd.getpwuid(os.getuid())[0],
         time.strftime("%c"),
@@ -200,4 +203,4 @@ grid = {
     'throw_ps': [2, 10]
 }
 
-power_times = [300, 600]
+power_times = [180, 600]
