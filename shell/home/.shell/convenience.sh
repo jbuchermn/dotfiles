@@ -9,3 +9,7 @@ function fd {
 function ld {
     ls $(find ${1:-.} | fzy)
 }
+
+function macho-gui {
+    $HOME/.shell/macho-gui.sh
+}
