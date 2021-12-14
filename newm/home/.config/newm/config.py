@@ -26,6 +26,10 @@ def on_startup():
     os.system("catapult &")
     os.system("waybar &")
 
+def on_reconfigure():
+    os.system("notify-send newm \"Reloaded config\" &")
+
+corner_radius = 20.5
 # v0.1
 # output_scale = 2.
 
@@ -47,6 +51,8 @@ pywm = {
 
     'natural_scroll': True,
 
+    'texture_shaders': 'basic'
+
     # v0.1
     # 'round_scale': 2.
 }
@@ -55,7 +61,7 @@ def should_float(view):
     if view.app_id == "catapult":
         return True, None, (0.5, 0.25)
     if view.app_id == "pavucontrol":
-        return True, (300, 600), (0.12, 0.35)
+        return True, (340, 600), (0.15, 0.4)
     # if view.app_id == "rofi":
     #     return True, (800, 800), (0.5, 0.5)
     if view.title is not None and view.title.strip() == "Firefox — Sharing Indicator":
@@ -68,10 +74,10 @@ view = {
     'send_fullscreen': False,
 
     'should_float': should_float,
-    'floating_min_size': True,
+    'floating_min_size': False,
 
     'debug_scaling': True,
-    'border_ws_switch': 100
+    'border_ws_switch': 100,
 }
 
 swipe_zoom = {
@@ -114,8 +120,8 @@ key_bindings = lambda layout: [
 
     ("M-Return", lambda: os.system("alacritty &")),
     ("M-e", lambda: os.system("emacsclient -c -a \"emacs\" &")),
-    ("M-c", lambda: os.system("chromium --enable-features=UseOzonePlatform --ozone-platform=wayland &")),
-    # ("M-c", lambda: os.system("MOZ_ENABLE_WAYLAND=1 firefox &")),
+    ("M-c", lambda: os.system("brave --enable-features=UseOzonePlatform --ozone-platform=wayland &")),
+    ("M-m", lambda: os.system("bash /$HOME/.shell/macho-gui.sh &")),
     ("M-q", lambda: layout.close_view()),
 
     ("M-p", lambda: layout.ensure_locked(dim=True)),
@@ -194,8 +200,8 @@ panels = {
         # 'cwd': '/home/jonas/newm-panel-nwjs'
     },
     'notifiers': {
-        'cmd': 'npm run start -- notifiers',
-        'cwd': '/home/jonas/newm-panel-nwjs'
+        # 'cmd': 'npm run start -- notifiers',
+        # 'cwd': '/home/jonas/newm-panel-nwjs'
     }
 }
 

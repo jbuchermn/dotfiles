@@ -92,11 +92,8 @@
 
     "memory": {
         "interval": 5,
-        "format": "  {}%", // Icon: memory
-        "states": {
-            "warning": 70,
-            "critical": 90
-        }
+        "format": "{}%",
+        "on-click": "alacritty -e htop"
     },
 
     "network": {

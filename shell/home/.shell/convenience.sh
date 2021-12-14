@@ -11,5 +11,5 @@ function ld {
 }
 
 function macho-gui {
-    $HOME/.shell/macho-gui.sh
+    zsh $HOME/.shell/macho-gui.sh
 }
