@@ -110,6 +110,9 @@
 (evil-define-key 'visual 'global
   (kbd "<right>") 'evil-shift-right)
 
+;; Mouse fix
+(setq mouse-wheel-progressive-speed nil)
+
 ;; Flycheck
 (setq flycheck-relevant-error-other-file-show nil)
 
@@ -118,3 +121,18 @@
 (defun my-py-flycheck-setup ()
   (flycheck-select-checker 'python-mypy))
 (add-hook 'python-mode-local-vars-hook #'my-py-flycheck-setup)
+
+;; mu4e at ~/mail
+(setq +mu4e-backend 'offlineimap)
+;; Each path is relative to the path of the maildir you passed to mu
+(set-email-account! "j.bucher.mn@gmail.com"
+  '((mu4e-sent-folder       . "/[Google Mail].Gesendet")
+    (mu4e-drafts-folder     . "/[Google Mail].Entw&APw-rfe")
+    (mu4e-trash-folder      . "/[Google Mail].Papierkorb")
+    (mu4e-refile-folder     . "/[Google Mail].Alle Nachrichten")
+    (smtpmail-smtp-user     . "j.bucher@gmail.com")
+    (mu4e-compose-signature . ""))
+  t)
+(setq +mu4e-gmail-accounts '(("j.bucher.mn@gmail.com" . "/")))
+(setq mu4e-index-cleanup nil
+      mu4e-index-lazy-check t)

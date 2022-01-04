@@ -57,6 +57,13 @@ pywm = {
     # 'round_scale': 2.
 }
 
+focus = {
+    'distance': 4,
+    'width': 2,
+    'animate_on_change': False,
+    'anim_time': .25
+}
+
 def should_float(view):
     if view.app_id == "catapult":
         return True, None, (0.5, 0.25)
